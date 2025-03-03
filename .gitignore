@@ -1,0 +1,5 @@
+.*
+!.gitignore
+*.backup
+*~
+node_modules/**
