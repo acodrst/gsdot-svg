@@ -16,7 +16,7 @@ async function gsdot_svg(dot,div) {
         node.attr("class").includes("process")
       ) {
         const bbox = node.node().getBBox();
-        bar = node.attr("class").includes("transform") ? "3,0" : "3,3";
+        const bar = node.attr("class").includes("transform") ? "3,0" : "3,3";
         node.append("line")
           .attr("x1", bbox.x)
           .attr("y1", bbox.y + 17)
