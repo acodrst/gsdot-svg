@@ -1,6 +1,15 @@
 import { Graphviz } from "@hpcc-js/wasm-graphviz";
 import { select } from "d3";
-async function gsdot_svg(dot,div) {
+async function gsdot_svg(dot_lines,dot_head,div) {
+  const dot=dot_head=='default'?`digraph {
+    esep=".20" 
+    overlap=false 
+    splines=true 
+    charset="utf-8"
+    graph [fontname="Arial"] 
+    edge [penwidth="2" arrowsize="0.5" arrowtail="vee" arrowhead="vee" color="#bbbbbb" fontname="Arial"]
+    node [penwidth="2" margin=".1,0" fontname="Arial"]\n${Object.values(dot_lines).join("\n")}\n}`:
+    `${dot_head}\n ${Object.values(dot_lines).join("\n")}\n}`; 
   const graphviz = await Graphviz.load();
   document.getElementById(div).innerHTML= graphviz.neato(dot)
   const gr = select(`#${div} svg`);
