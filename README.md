@@ -17,6 +17,8 @@ digraph {
     edge [penwidth="2" arrowsize="0.5" arrowtail="vee" arrowhead="vee" color="#bbbbbb" fontname="Arial"]
     node [penwidth="2" margin=".1,0" fontname="Arial"]
 ```
+gsdot_svg returns the svg in addtion to setting the div
 
 Licenses for D3 and hpcc-js/wasm-graphviz are  in dist
- 
+
+Color scheme is from [Paul Tol](https://personal.sron.nl/~pault/) 

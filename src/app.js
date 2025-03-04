@@ -1,22 +1,31 @@
 import { Graphviz } from "@hpcc-js/wasm-graphviz";
-import { select } from "d3";
-async function gsdot_svg(dot_lines,dot_head,div) {
-  const dot=dot_head=='default'?`digraph {
+import { select, zoom } from "d3";
+async function gsdot_svg(dot_lines, dot_head, div) {
+  const dot = dot_head == "default"
+    ? `digraph {
     esep=".20" 
     overlap=false 
     splines=true 
     charset="utf-8"
     graph [fontname="Arial"] 
     edge [penwidth="2" arrowsize="0.5" arrowtail="vee" arrowhead="vee" color="#bbbbbb" fontname="Arial"]
-    node [penwidth="2" margin=".1,0" fontname="Arial"]\n${Object.values(dot_lines).join("\n")}\n}`:
-    `${dot_head}\n ${Object.values(dot_lines).join("\n")}\n}`; 
+    node [penwidth="2" margin=".1,0" fontname="Arial"]\n${
+      Object.values(dot_lines).join("\n")
+    }\n}`
+    : `${dot_head}\n ${Object.values(dot_lines).join("\n")}\n}`;
   const graphviz = await Graphviz.load();
-  document.getElementById(div).innerHTML= graphviz.neato(dot)
+  document.getElementById(div).innerHTML = graphviz.neato(dot);
   const gr = select(`#${div} svg`);
+  const zm = zoom()
+    .on("zoom", zoomed);
+  function zoomed(e) {
+    gr.attr("transform", e.transform);
+  }
+  select(`#${div}`).call(zm);
   gr.selectAll(".node")
     .each(function () {
       const node = select(this);
-   if (node.attr("class").includes("datastores")) {
+      if (node.attr("class").includes("datastores")) {
         const pl = node.selectAll("polyline");
         pl.attr("stroke-dasharray", "3,3");
       }
@@ -60,5 +69,6 @@ async function gsdot_svg(dot_lines,dot_head,div) {
         }
       }
     });
+  return gr.node().outerHTML;
 }
-export { gsdot_svg }
+export { gsdot_svg };
