@@ -1,19 +1,20 @@
 {
   "name": "gsdot-svg",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "type": "module",
   "description": "Converts Graph Stack text model dots to SVG with adornments",
-  "main": "src/app.js",
+  "main": "dist/gsdot-svg.bundle.js",
+  "repository": { "type": "git", "url": "git@github.com:acodrst/gsdot-svg.git" },
   "author": "Scott H.",
   "license": "CC0-1.0",
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.3.0",
-    "rollup": "^4.24.0"
+    "rollup": "^4.24.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup-license-plugin": "^3.0.2"
   },
   "dependencies": {
     "@hpcc-js/wasm-graphviz": "^1.7.0",
-    "@rollup/plugin-terser": "^0.4.4",
-    "d3": "^7.9.0",
-    "rollup-license-plugin": "^3.0.2"
+    "d3": "^7.9.0"
   }
 }
