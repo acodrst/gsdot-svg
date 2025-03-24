@@ -1,16 +1,23 @@
 {
   "name": "gsdot-svg",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "type": "module",
   "description": "Converts Graph Stack text model dots to SVG with adornments",
   "main": "dist/gsdot-svg.bundle.js",
-  "repository": { "type": "git", "url": "git@github.com:acodrst/gsdot-svg.git" },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:acodrst/gsdot-svg.git"
+  },
   "author": "Scott H.",
   "license": "CC0-1.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./node_modules/rollup/dist/bin/rollup -c"
+  },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.3.0",
-    "rollup": "^4.24.0",
     "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.24.0",
     "rollup-license-plugin": "^3.0.2"
   },
   "dependencies": {

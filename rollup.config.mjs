@@ -9,4 +9,3 @@ export default
     nodeResolve(),
     createRollupLicensePlugin({ outputFilename: 'gsdot-svg_licenses.json' })]
 }
-
