@@ -1,5 +1,15 @@
 import { Graphviz } from "@hpcc-js/wasm-graphviz";
 import { select, zoom } from "d3";
+const ids = new Set();
+const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+function rn() {
+  let id;
+  const one = chars[Math.floor(Math.random() * 26)];
+  const rest = () => chars[Math.floor(Math.random() * 36)];
+  do id = one + rest() + rest(); while (ids.has(id));
+  ids.add(id);
+  return id;
+}
 async function gsdot_svg(dot_lines, dot_head, kind) {
   const head = `digraph {
     esep=".20" 
@@ -11,20 +21,20 @@ async function gsdot_svg(dot_lines, dot_head, kind) {
     node [penwidth="2" margin=".1,0" fontname="Arial"]\n`
   const key = {
     item:`${head}
-    "agent" [color="#009988" shape="rectangle" class="agents" label="agent" ]
-    "process" [color="#33bbee"  shape="rectangle" style="rounded" 
+    "agent" [id="${rn()}" color="#009988" shape="rectangle" class="agents" label="agent" ]
+    "process" [id="${rn()}" color="#33bbee"  shape="rectangle" style="rounded" 
     class="processes zoomable noteattached has_subclass" label="0.1
 process "]
-"agent" -> "process"}`,
-    process: `${head}"process" [color="#33bbee"  shape="rectangle" style="rounded" 
+"agent" -> "process"\n}`,
+    process: `${head}"process" [id="${rn()}" color="#33bbee"  shape="rectangle" style="rounded" 
     class="processes zoomnotable notenotattached" label="0.1
-:: processes "]}`,
-    datastore: `${head}"datastore" [color="#cc3311" shape="record" class="datastores" label="<f0> R2|<f1> :: datastores "]}`,
-    transform: `${head}"transform" [color="#33bbee"  shape="rectangle" style="rounded" 
+:: processes "]\n}`,
+    datastore: `${head}"datastore" [id="${rn()}" color="#cc3311" shape="record" class="datastores" label="<f0> R2|<f1> :: datastores "]}`,
+    transform: `${head}"transform" [id="${rn()}" color="#33bbee"  shape="rectangle" style="rounded" 
       class="transforms zoomnotable notenotattached" label="0.2
-:: transforms "]}`,
-    agent: `${head}"agents" [color="#009988" shape="rectangle" class="agents" label=":: agents" ]}`,
-    location: `${head}"locations" [color="#cc3311" shape="record" class="locations" label="<f0> R1|<f1> :: locations "]}`
+:: transforms "]\n}`,
+    agent: `${head}"agents" [id="${rn()}" color="#009988" shape="rectangle" class="agents" label=":: agents" ]\n}`,
+    location: `${head}"locations" [color="#cc3311" shape="record" class="locations" label="<f0> R1|<f1> :: locations "]\n}`
   }
   const dot = dot_head == "default"
     ? `${head}
@@ -32,16 +42,26 @@ process "]
     }\n}`
     : `${dot_head}\n ${Object.values(dot_lines).join("\n")}\n}`;
   const graphviz = await Graphviz.load();
-  kind == 'key' ? document.getElementById(kind).innerHTML = `
-  <table>
+  const kind_html= kind == 'key' ? `<table>
 <tr><td>${graphviz.neato(key.process)}</td><td>Modifies data form and location</td>
 <tr><td>${graphviz.neato(key.transform)}</td><td>Modifies material form and location</td>
 <tr><td>${graphviz.neato(key.agent)}</td><td>Source or sink of data or operational control</td>
 <tr><td>${graphviz.neato(key.location)}</td><td>Materials at rest</td>
 <tr><td>${graphviz.neato(key.datastore)}</td><td></div><div class="key_txt">Data at rest</td>
 <tr><td>${graphviz.neato(key.item)}</td><td>:: forward (|| back both)- Orange :: note || :: narrative - Magenta can zoom - Blue :: subclass_of</td>
+<tr><td>  \` (backtick)</td><td>Redraw graph when entering Graph Stack Format text</td>
+<tr><td>📥️</td><td>Import Graph Stack Text</td>
+<tr><td>📤️</td><td>Export Graph Stack Text</td>
+<tr><td>💾</td><td>Save Key as HTML or Map as SVG</td>
 </table>`
-    : document.getElementById(kind).innerHTML = graphviz.neato(dot);
+    : graphviz.neato(dot)
+    let kind_html_split=kind_html.split('id="graph0"')
+    let html=''
+    for (let i=0;i<kind_html_split.length-1;i++){
+      html+=`${kind_html_split[i]}id="${rn()}"`
+    }
+    html+=kind_html_split.slice(-1)
+  document.getElementById(kind).innerHTML =html
   let gr
   if (kind == 'map') {
     gr = select(`#${kind} svg`)
