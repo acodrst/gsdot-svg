@@ -1,1 +1,0 @@
-/home/divine/websites/repos/gsdot-svg/dist/gsdot-svg.bundle.js
