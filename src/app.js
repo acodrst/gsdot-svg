@@ -1,5 +1,6 @@
 import { Graphviz } from "@hpcc-js/wasm-graphviz";
 import { select, zoom } from "d3";
+
 const ids = new Set();
 const xhref = {};
 const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -43,7 +44,7 @@ process "]
       `${head}"locations" [color="#cc3311" shape="record" class="locations" label="<f0> R1|<f1> :: locations "]\n}`,
   };
   for (
-    const d of Object.values(dot_lines).join("\n").matchAll(
+    const d of dot_lines.join("\n").matchAll(
       /id="(.*?)" xhref="(.*?)"/gsm,
     )
   ) {
@@ -51,8 +52,8 @@ process "]
   }
   const dot = dot_head == "default"
     ? `${head}
-    ${Object.values(dot_lines).join("\n")}\n}`
-    : `${dot_head}\n ${Object.values(dot_lines).join("\n")}\n}`;
+    ${dot_lines.join("\n")}\n}`
+    : `${dot_head}\n ${dot_lines.join("\n")}\n}`;
   const graphviz = await Graphviz.load();
   const kind_html = kind == "key"
     ? `<table>

@@ -1,6 +1,6 @@
 {
   "name": "gsdot-svg",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "type": "module",
   "description": "Converts Graph Stack text model dots to SVG with adornments",
   "main": "dist/gsdot-svg.bundle.js",
