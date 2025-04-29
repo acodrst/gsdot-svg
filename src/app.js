@@ -87,17 +87,24 @@ process "]
     html += `${kind_html_split[i]}id="${rn()}"`;
   }
   html += kind_html_split.slice(-1);
-  document.getElementById(kind).innerHTML = html;
+  const map_div= document.getElementById(kind)
+  map_div.innerHTML = html;
   let gr;
   const zm = zoom()
     .on("zoom", zoomed);
   if (kind == "map") {
     gr = select(`#${kind} svg`);
+    //const center=[map_div.getBoundingClientRect().width/2,map_div.getBoundingClientRect().height/2]
+    const center=[gr.node().clientWidth/2,gr.node().clientHeight/2]
+    const scalew=map_div.getBoundingClientRect().width/gr.node().clientWidth
+    const scaleh=map_div.getBoundingClientRect().height/gr.node().clientHeight
     select(`#${kind}`).call(zm);
+    zm.scaleBy(gr,Math.min(scaleh,scalew)*.9,[-280,-220])
   } else gr = select(`#${kind}`);
   function zoomed(e) {
     gr.attr("transform", e.transform);
   }
+
   gr.selectAll(".node")
     .each(function () {
       const node = select(this);
