@@ -1,5 +1,6 @@
 import { Graphviz } from "@hpcc-js/wasm-graphviz";
 import { select, zoom } from "d3";
+import wordwrap from "wordwrapjs";
 
 const ids = new Set();
 const xhref = {};
@@ -12,7 +13,12 @@ function rn() {
   ids.add(id);
   return id;
 }
-async function gsdot_svg(dot_lines, dot_head, kind) {
+async function gsdot_svg(dot_lines, dot_head, kind, path_text, levs) {
+  const path = path_text.includes(".") ? path_text.split(".") : [path_text];
+  const meta_path = path_text == "Top" ? "Top" : path.slice(0, -1).join(".");
+  const narrative = levs[meta_path]?.aspects?.[path.slice(-1)[0]]?.narrative ||
+    "";
+  const note = levs[meta_path]?.aspects?.[path.slice(-1)[0]]?.note || "";
   const head = `digraph {
     esep=".20" 
     overlap=false 
@@ -87,24 +93,18 @@ process "]
     html += `${kind_html_split[i]}id="${rn()}"`;
   }
   html += kind_html_split.slice(-1);
-  const map_div= document.getElementById(kind)
+  const map_div = document.getElementById(kind);
   map_div.innerHTML = html;
   let gr;
   const zm = zoom()
     .on("zoom", zoomed);
   if (kind == "map") {
     gr = select(`#${kind} svg`);
-    //const center=[map_div.getBoundingClientRect().width/2,map_div.getBoundingClientRect().height/2]
-    const center=[gr.node().clientWidth/2,gr.node().clientHeight/2]
-    const scalew=map_div.getBoundingClientRect().width/gr.node().clientWidth
-    const scaleh=map_div.getBoundingClientRect().height/gr.node().clientHeight
     select(`#${kind}`).call(zm);
-    zm.scaleBy(gr,Math.min(scaleh,scalew)*.9,[-280,-220])
   } else gr = select(`#${kind}`);
   function zoomed(e) {
     gr.attr("transform", e.transform);
   }
-
   gr.selectAll(".node")
     .each(function () {
       const node = select(this);
@@ -162,6 +162,71 @@ process "]
         }
       }
     });
+  if (kind == "map") {
+    const font_pix = 14;
+    const fig = gr.node().getBBox();
+    const extra_left = (path.toSorted(function (a, b) {
+      return b.length - a.length;
+    })[0].length + path.length * 2) * font_pix * .6;
+    path.reverse();
+    const bottom_lines = wordwrap.wrap(narrative, {
+      width: (fig.width + extra_left) / font_pix * 2.2,
+    }).split("\n");
+    const extra_bottom = bottom_lines.length * font_pix * 1.3 + font_pix * 1.3 +
+      50;
+    const x_loc = -extra_left + fig.width / 3;
+    gr.attr("height", fig.height + extra_bottom + font_pix * 3 * 1.3)
+      .attr("width", fig.width + extra_left)
+      .attr("viewBox", [
+        -extra_left,
+        -font_pix * 3 * 1.3,
+        fig.width + extra_left,
+        fig.height + extra_bottom + font_pix * 3 * 1.3,
+      ]);
+    gr.append("g");
+    const last_g = select(gr.selectAll("g").nodes().reverse()[0]);
+    last_g
+      .append("text")
+      .text(levs[path_text].level.slice(-1)[0])
+      .attr("x", x_loc)
+      .attr("y", -font_pix * 2 * 1.3)
+      .attr("dy", `${font_pix / 7}px`)
+      .attr("font-weight", "900")
+      .attr("font-family", "Arial, Helvetica, sans-serif")
+      .attr("font-size", `${font_pix}px`);
+    if (note != "") {
+      last_g
+        .append("text")
+        .text(`note: ${note}`)
+        .attr("x", -1 * extra_left + 3)
+        .attr("y", -font_pix * 1.3)
+        .attr("dy", `${font_pix / 7}px`)
+        .attr("font-family", "Arial, Helvetica, sans-serif")
+        .attr("font-size", `${font_pix}px`);
+    }
+    for (const i in bottom_lines) {
+      last_g
+        .append("text")
+        .text(bottom_lines[i])
+        .attr("x", -1 * extra_left + 3)
+        .attr("y", font_pix * i * 1.3 + 4 * font_pix * 1.3 + fig.height)
+        .attr("dy", `${font_pix / 7}px`)
+        .attr("font-family", "Arial, Helvetica, sans-serif")
+        .attr("font-size", `${font_pix}px`);
+    }
+    for (const i in path.reverse()) {
+      last_g
+        .append("a")
+        .attr("font-family", "Arial, Helvetica, sans-serif")
+        .style("font-size", `${font_pix}px`)
+        .attr("xlink:href", `#${path.slice(0, parseInt(i) + 1).join(".")}`)
+        .attr("xlink:title", path[i])
+        .append("text")
+        .text(`${" ⇥ ".repeat(i)}${path[i]}`)
+        .attr("x", -1 * extra_left + 3)
+        .attr("y", i * font_pix * 1.3 + font_pix * 1.3);
+    }
+  }
   return gr.node().outerHTML;
 }
 export { gsdot_svg };
